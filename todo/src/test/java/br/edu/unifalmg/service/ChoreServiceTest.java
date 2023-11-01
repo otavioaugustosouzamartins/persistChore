@@ -4,6 +4,7 @@ import br.edu.unifalmg.domain.Chore;
 import br.edu.unifalmg.enumerator.ChoreFilter;
 import br.edu.unifalmg.exception.*;
 import br.edu.unifalmg.repository.ChoreRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -289,6 +290,26 @@ public class ChoreServiceTest {
         service.loadChores();
         List<Chore> loadChores = service.getChores();
         assertTrue(loadChores.isEmpty());
+    }
+    @Test
+    @DisplayName("#saveChores > When the chores is not empty > Return true")
+    void saveChoresWhenTheChoreIsNotEmptyReturnTrue() {
+        Mockito.when(service.saveChores()).thenReturn(Boolean.TRUE);
+        Assertions.assertTrue(service.saveChores());
+    }
+
+    @Test
+    @DisplayName("#saveChores > When the chores is empty > Return true")
+    void saveChoresWhenTheChoreIsEmptyReturnTrue() {
+        Mockito.when(service.saveChores()).thenReturn(Boolean.TRUE);
+        Assertions.assertTrue(service.saveChores());
+    }
+
+    @Test
+    @DisplayName("#saveChores > When the chores is null > Throw a Exceprion")
+    void saveChoresWhenTheChoreIsNullThrowException(){
+        Mockito.when(service.saveChores()).thenThrow(EmptyChoreListException.class);
+        Assertions.assertThrows(EmptyChoreListException.class,()->service.saveChores());
     }
 
 }

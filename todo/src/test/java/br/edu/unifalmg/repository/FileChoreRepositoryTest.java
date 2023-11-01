@@ -1,6 +1,7 @@
 package br.edu.unifalmg.repository;
 
 import br.edu.unifalmg.domain.Chore;
+import br.edu.unifalmg.exception.EmptyChoreListException;
 import br.edu.unifalmg.repository.impl.FileChoreRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -17,6 +18,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -73,5 +76,42 @@ public class FileChoreRepositoryTest {
                 () -> assertEquals("First Chore", chores.get(0).getDescription()),
                 () -> assertEquals(LocalDate.now().minusDays(5), chores.get(1).getDeadline())
         );
+    }
+    @Test
+    @DisplayName("#save > When the chores is empty > Return true")
+    void saveWhenTheChoreIsEmptyReturnTrue() throws IOException {
+        Mockito.doNothing().when(mapper).writeValue(new File("chores.json"), new ArrayList<Chore>());
+        Assertions.assertTrue(repository.save(new ArrayList<Chore>()));
+    }
+
+    @Test
+    @DisplayName("#save > When the chores is not empty > Return true")
+    void saveWhenTheChoreIsNotEmptyReturnTrue() throws IOException {
+        List<Chore> chores = new ArrayList<Chore>(Arrays.asList(new Chore("Chore 1", Boolean.FALSE, LocalDate.now())));
+        Mockito.doNothing().when(mapper).writeValue(new File("chores.json"), chores);
+        Assertions.assertTrue(repository.save(new ArrayList<Chore>()));
+    }
+
+    @Test
+    @DisplayName("#save > When the file is not found (or path is invalid) > Throw a exception")
+    void saveWhenTheFileIsNotFoundOrPathIsInvalidReturnAException() throws IOException {
+        List<Chore> chores = new ArrayList<Chore>(Arrays.asList(new Chore("Chore 1", Boolean.FALSE, LocalDate.now())));
+        Mockito.doThrow(IOException.class).when(mapper).writeValue(new File("chores.json"), chores);
+        Assertions.assertFalse(repository.save(chores));
+    }
+
+    @Test
+    @DisplayName("#save > When the chores is not empty and the file is found > Return true")
+    void saveWhenTheChoreIsNotEmptyAndTheFileIsFoundReturnTrue() throws IOException {
+        List<Chore> chores = new ArrayList<Chore>(Arrays.asList(new Chore("Chore 1", Boolean.FALSE, LocalDate.now())));
+        Mockito.doNothing().when(mapper).writeValue(new File("chores.json"), chores);
+        Assertions.assertTrue(repository.save(chores));
+    }
+
+    @Test
+    @DisplayName("#save > When the chores is null > Throw a Exceprion")
+    void saveWhenTheChoreIsNullThrowException() throws IOException {
+        Mockito.doThrow(EmptyChoreListException.class).when(mapper).writeValue(new File("chores.json"), null);
+        Assertions.assertThrows(EmptyChoreListException.class,()->repository.save(null));
     }
 }
